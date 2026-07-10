@@ -1,2 +1,2 @@
 # agent-harness
-Public synchronized Agent skills harness
+Public Agent engineering asset repositor
