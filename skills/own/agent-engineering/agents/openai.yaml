@@ -1,0 +1,4 @@
+interface:
+  display_name: "agent-engineering"
+  short_description: "维护个人 Agent 工程资产库"
+  default_prompt: "使用 $agent-engineering 维护 agent-engineering 仓库里的 Skill、prompt、cli、mcp、hook、workflow、plugin 和 agent 资产。"

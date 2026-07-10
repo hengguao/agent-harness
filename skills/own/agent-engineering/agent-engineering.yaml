@@ -1,0 +1,13 @@
+name: agent-engineering
+type: skill
+origin: own
+
+source:
+  kind: local
+
+sync:
+  mode: manual
+  last_checked:
+  last_updated: 2026-07-09
+  version:
+  notes: 管理 agent-engineering 资产库的 Skill，负责导入、刷新、发布、扫描、本地仓库定位和元数据维护，不负责安装资产到本机 Agent。

@@ -1,0 +1,4 @@
+interface:
+  display_name: "my-tools-manager"
+  short_description: "统一管理命令行工具安装升级重装验证路径和配置提醒事项"
+  default_prompt: "使用 $my-tools-manager 管理 codegraph 的安装、升级或重装，并提醒我 cc-switch MCP 配置。"

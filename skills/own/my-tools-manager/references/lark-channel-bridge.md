@@ -1,0 +1,387 @@
+# lark-channel-bridge 管理规则
+
+## 工具信息
+
+- 工具名：lark-channel-bridge
+- 相关仓库：https://github.com/zarazhangrui/lark-coding-agent-bridge
+- 中文 README：https://github.com/zarazhangrui/lark-coding-agent-bridge/blob/main/README.zh.md
+- npm 包名：`lark-channel-bridge`
+- CLI 命令：`lark-channel-bridge`
+- npm bin：`lark-channel-bridge`
+- 当前 npm latest 可用 `npm view lark-channel-bridge version` 查询
+- Node 要求：`>=20.12.0`
+
+用途：把飞书 / Lark 消息和本地 Claude Code 或 Codex CLI 打通，让用户在飞书私聊、群聊或文档评论里调用本机编程助手。
+
+## 自更新流程
+
+使用 `工具信息` 中的相关仓库、中文 README 和 npm 包信息核对最新规则。
+
+自更新时重点检查：
+
+1. Node.js 版本要求是否变化。
+2. 安装命令是否仍是 `npm i -g lark-channel-bridge` / `pnpm add -g lark-channel-bridge`。
+3. `npx` 是否仍只适合单次 `run`，服务层命令是否仍要求全局安装。
+4. `run`、`start`、`status`、`stop`、`restart`、`unregister`、profile 命令是否变化。
+5. `~/.lark-channel/` 数据目录、日志目录、secrets 文件和环境变量是否变化。
+6. 权限模式映射、访问控制、lark-cli 身份策略是否变化。
+7. 是否新增 MCP Server 启动方式；没有明确 MCP server 命令时，不生成 cc-switch `mcpServers` 配置。
+
+## 前置条件
+
+安装或启动前确认：
+
+```bash
+node -v
+command -v claude || true
+command -v codex || true
+```
+
+要求：
+
+- Node.js `>=20.12.0`。
+- 本机至少安装并登录一个 agent：Claude Code 的 `claude` 或 Codex CLI 的 `codex`。
+- 有一个飞书 / Lark PersonalAgent 应用。首次启动扫码向导可以创建并绑定。
+
+## 检查命令
+
+```bash
+command -v lark-channel-bridge || true
+lark-channel-bridge --version
+lark-channel-bridge --help
+npm list -g lark-channel-bridge --depth=0
+npm view lark-channel-bridge version bin engines repository
+npm config get prefix
+npm root -g
+```
+
+如果 `--version` 不可用，不要直接判定失败；用 `--help`、`command -v` 和 npm 包信息辅助验证。
+
+## 安装
+
+官方 README 推荐全局安装；服务层命令必须先全局安装，不能依赖 `npx` 临时缓存。
+
+npm：
+
+```bash
+npm i -g lark-channel-bridge
+```
+
+pnpm：
+
+```bash
+pnpm add -g lark-channel-bridge
+```
+
+默认优先使用 npm，除非用户明确要求 pnpm。
+
+## 升级
+
+沿用当前安装来源，不主动迁移。
+
+npm 来源：
+
+```bash
+npm i -g lark-channel-bridge@latest
+```
+
+pnpm 来源：
+
+```bash
+pnpm add -g lark-channel-bridge@latest
+```
+
+升级后验证：
+
+```bash
+lark-channel-bridge --version
+lark-channel-bridge --help
+command -v lark-channel-bridge
+```
+
+如果后台服务已注册，升级后提醒用户重启对应 profile：
+
+```bash
+lark-channel-bridge restart --profile <name>
+lark-channel-bridge status --profile <name>
+```
+
+默认 profile 可省略 `--profile`。
+
+## 升级后处理
+
+升级后的处理分两部分：
+
+1. 先完成服务切换，处理“旧运行态 + 新 CLI”混跑问题。
+2. 再处理本机的本地定制改造，确认是否需要基于新代码重新补丁。
+
+### 升级后重启 / 迁移 SOP
+
+详见 `references/lark-channel-bridge/operations.md`。
+
+### 升级后的本地定制改造：按群免 @
+
+详见 `references/lark-channel-bridge/local-patches.md`。
+
+## 重装
+
+重装前必须确认安装来源、是否存在后台服务、是否需要保留 `~/.lark-channel/` 数据。
+
+npm 来源：
+
+```bash
+npm uninstall -g lark-channel-bridge
+npm i -g lark-channel-bridge@latest
+```
+
+pnpm 来源：
+
+```bash
+pnpm remove -g lark-channel-bridge
+pnpm add -g lark-channel-bridge@latest
+```
+
+若有后台服务，先停止或注销服务：
+
+```bash
+lark-channel-bridge stop --profile <name>
+lark-channel-bridge unregister --profile <name>
+```
+
+不要默认删除 `~/.lark-channel/`。它包含配置、profiles、会话、日志、secrets、附件缓存和 lark-cli 目录。只有用户明确要求清理状态，并确认影响后，才删除或迁移。
+
+## 首次启动和初始化
+
+前台运行，适合首次配置和调试：
+
+```bash
+lark-channel-bridge run
+```
+
+首次运行会进入扫码向导：
+
+1. 终端渲染二维码。
+2. 用户用飞书 App 扫码。
+3. 选择或创建 PersonalAgent 应用。
+4. 如果终端提示，选择本次要初始化的 agent。
+5. 成功后配置写入 `~/.lark-channel/config.json`。
+
+已有 PersonalAgent app 时：
+
+```bash
+lark-channel-bridge run --app-id cli_xxx
+lark-channel-bridge start --app-id cli_xxx
+```
+
+Lark 国际版应用：
+
+```bash
+lark-channel-bridge run --tenant lark
+```
+
+没有指定项目目录也可以启动。启动后可在飞书里发送 `/cd <path>` 切到实际项目。
+
+## 后台服务
+
+前台调试确认可收发消息后，用系统服务常驻后台：
+
+```bash
+lark-channel-bridge start
+lark-channel-bridge status
+lark-channel-bridge stop
+```
+
+服务层命令必须使用全局安装的 CLI，不要用 npx 临时路径。daemon 的 launchd plist / systemd unit / Windows 任务会记录 CLI 路径；如果来自 npm 临时缓存，缓存清理后 daemon 会无法启动。
+
+profile 级服务：
+
+```bash
+lark-channel-bridge start --profile <name>
+lark-channel-bridge stop --profile <name>
+lark-channel-bridge restart --profile <name>
+lark-channel-bridge status --profile <name>
+lark-channel-bridge unregister --profile <name>
+```
+
+平台映射：
+
+- macOS：launchd 用户代理 `ai.lark-channel-bridge.bot.<profile>`
+- Linux：systemd 用户单元 `lark-channel-bridge.bot.<profile>.service`
+- Windows：Task Scheduler 任务 `LarkChannelBridge.Bot.<profile>`
+
+daemon 日志：
+
+```text
+~/.lark-channel/profiles/<profile>/logs/daemon/
+```
+
+## 多 profile
+
+仅在需要同时连接多个 PersonalAgent 应用，或分别运行 Claude 和 Codex 时，创建多个 profile。
+
+```bash
+lark-channel-bridge start --profile claude --agent claude
+lark-channel-bridge start --profile codex --agent codex
+lark-channel-bridge restart --profile codex
+lark-channel-bridge status --profile codex
+```
+
+profile 管理：
+
+```bash
+lark-channel-bridge profile create claude --agent claude
+lark-channel-bridge profile create codex --agent codex
+lark-channel-bridge profile list
+lark-channel-bridge profile use <name>
+lark-channel-bridge profile remove <name>
+lark-channel-bridge profile remove <name> --purge --yes
+lark-channel-bridge profile export <name> [--output ./profile.json] [--force]
+lark-channel-bridge profile export <name> --include-secrets --yes
+```
+
+`profile remove` 默认归档本地状态；只有 `--purge --yes` 才永久删除。`profile export` 默认脱敏 app secret；只有 `--include-secrets --yes` 才导出敏感配置。
+
+## 常用宿主命令
+
+```text
+lark-channel-bridge run [--profile <name>] [--agent claude|codex] [--workspace <path>] [-c <config>]
+lark-channel-bridge migrate [--profile <name>] [--agent claude|codex]
+lark-channel-bridge ps
+lark-channel-bridge kill <id|#>
+lark-channel-bridge --help
+```
+
+## 飞书内命令
+
+常用斜杠命令：
+
+```text
+/new 或 /reset
+/cd <path>
+/ws list
+/ws save <name>
+/ws use <name>
+/ws remove <name>
+/resume
+/status
+/config
+/invite user @某人
+/invite admin @某人
+/invite group
+/invite all group
+/remove user @某人
+/remove admin @某人
+/remove group
+/stop
+/timeout [N|off|default]
+/ps
+/exit <id|#>
+/reconnect
+/doctor [描述]
+/help
+```
+
+私聊不需要 @。群和话题群默认必须 `@bot`；`@all` 会被忽略。支持的云文档评论里 @bot 会触发回复。
+
+## lark-cli 身份策略
+
+每个 profile 使用自己的 lark-cli 目录：
+
+```text
+~/.lark-channel/profiles/<profile>/lark-cli
+```
+
+agent 子进程会收到 `LARKSUITE_CLI_CONFIG_DIR`，所以一个 profile 里的个人授权不会共享给另一个 profile。
+
+默认策略是 `bot-only`：lark-cli 使用应用 / bot 身份，不访问个人资源。当用户为了日历、邮箱、云盘等个人资源完成授权后，当前 profile 可切到 `user-default`。
+
+## 工作目录和权限模式
+
+每个 profile 可有默认工作目录 `workspaces.default`。新建 profile 时可传：
+
+```bash
+lark-channel-bridge start --workspace <path>
+```
+
+bridge 会拒绝 `/`、Home 根、系统目录或临时目录根等过大范围。工作目录只是 agent run 的当前目录，不是文件系统 sandbox。
+
+权限映射：
+
+| Bridge access | Claude permission mode | Codex mode |
+|---|---|---|
+| `full` | `bypassPermissions` | `danger-full-access` |
+| `workspace` | `acceptEdits` | `workspace-write` |
+| `read-only` | `plan` | `read-only` |
+
+新 profile 默认 `permissions.defaultAccess` 和 `permissions.maxAccess` 都是 `full`。如需收紧，可改成 `workspace` 或 `read-only`，但本地工具执行、登录授权流程、文件写入能力可能受限。
+
+## 数据目录
+
+默认状态目录：
+
+```text
+~/.lark-channel/
+```
+
+关键路径：
+
+```text
+~/.lark-channel/config.json
+~/.lark-channel/active-profile
+~/.lark-channel/profiles/<profile>/sessions.json
+~/.lark-channel/profiles/<profile>/sessions.json.catalog.json
+~/.lark-channel/profiles/<profile>/workspaces.json
+~/.lark-channel/profiles/<profile>/secrets.enc
+~/.lark-channel/profiles/<profile>/lark-cli/
+~/.lark-channel/profiles/<profile>/media/
+~/.lark-channel/profiles/<profile>/logs/
+~/.lark-channel/registry/processes.json
+~/.lark-channel/registry/locks/
+```
+
+可用环境变量迁移状态目录：
+
+```bash
+LARK_CHANNEL_HOME=/path/to/state lark-channel-bridge start
+```
+
+日志保留：
+
+```bash
+LARK_CHANNEL_LOG_DAYS=14 lark-channel-bridge start
+```
+
+## 访问控制和安全
+
+- 默认只有创建 / 拥有 PersonalAgent 应用的人能使用 bot。
+- 允许同事私聊：`/invite user @某人`
+- 允许当前群：`/invite group`
+- 添加管理员：`/invite admin @某人`
+- 移除访问：使用 `/remove ...`
+- 配置下一条消息生效；手改配置后需要重启或 `/reconnect`。
+
+安全注意：
+
+- 该工具把飞书消息接入本机 Claude/Codex，可能触发读文件、改代码、执行工具等行为。
+- 不要把含敏感权限的 bot 暴露到不可信群。
+- 不要输出或提交 `~/.lark-channel/profiles/<profile>/secrets.enc`、导出的 secrets、App Secret、token 或 cookie。
+- `profile export --include-secrets --yes` 会导出敏感配置，只有用户明确要求时才执行。
+- 删除 profile 或清理状态前，必须明确影响范围。
+
+## 遥测
+
+默认不上报任何数据。只有用户主动设置 `LARK_CHANNEL_TELEMETRY_MODULE` 时才加载外部遥测模块：
+
+```bash
+LARK_CHANNEL_TELEMETRY_MODULE=your-telemetry-package lark-channel-bridge start
+```
+
+## cc-switch MCP 配置提醒
+
+`lark-channel-bridge` 是飞书消息到本地 Claude Code / Codex CLI 的桥接 bot，不是 MCP Server。不要默认生成 cc-switch `mcpServers` 配置。
+
+如果用户问 MCP：
+
+- 说明它通过飞书消息驱动本机 agent，不通过 MCP stdio 暴露工具。
+- 只有 README 或官方文档明确提供 MCP server 启动方式时，才生成 MCP 配置。
+- 当前规则只管理安装、运行、后台服务、profile 和数据目录。

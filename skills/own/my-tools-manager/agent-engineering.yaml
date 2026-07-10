@@ -1,0 +1,13 @@
+name: my-tools-manager
+type: skill
+origin: own
+
+source:
+  kind: local
+
+sync:
+  mode: manual
+  last_checked:
+  last_updated: 2026-07-04
+  version:
+  notes: 本机命令行工具、MCP 工具和开发辅助工具生命周期管理 Skill。
