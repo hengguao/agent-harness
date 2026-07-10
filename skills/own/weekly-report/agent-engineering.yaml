@@ -1,0 +1,13 @@
+name: weekly-report
+type: skill
+origin: own
+
+source:
+  kind: local
+
+sync:
+  mode: manual
+  last_checked:
+  last_updated: 2026-07-10
+  version:
+  notes: 基于 git commit 和飞书项目数据生成周报草稿，并在确认后归档到飞书 Wiki 的 Skill。
