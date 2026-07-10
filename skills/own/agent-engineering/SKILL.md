@@ -34,8 +34,6 @@ source:
   path: /absolute/path/to/local/asset
 ```
 
-本文中的 `references/...` 都指本技能目录下的引用文件，例如 `/path/to/agent-engineering/references/metadata-schema.md`，不是资产库本地副本仓库根目录下的 `references/...`。
-
 修改 `agent-engineering.yaml` 前读取本技能目录下的 `references/metadata-schema.md`。
 
 整理目录或导入新资产类型前读取本技能目录下的 `references/asset-layout.md`。
