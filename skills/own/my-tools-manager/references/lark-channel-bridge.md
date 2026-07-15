@@ -4,7 +4,7 @@
 
 - 工具名：lark-channel-bridge
 - 上游仓库：https://github.com/zarazhangrui/lark-coding-agent-bridge
-- 本机定制 fork：https://github.com/hengguao/lark-coding-agent-bridge
+- 本机定制 fork：以本机源码仓库的 `origin` remote 为准
 - 中文 README：https://github.com/zarazhangrui/lark-coding-agent-bridge/blob/main/README.zh.md
 - npm 包名：`lark-channel-bridge`
 - CLI 命令：`lark-channel-bridge`
@@ -131,48 +131,53 @@ pnpm add -g lark-channel-bridge
 
 ## 升级
 
-当前机器默认从 fork 升级：先同步 fork 的 `main`，再把最新 `main` merge 到 `develop`，验证通过后从 `develop` 构建安装。
+当前机器默认从本机 fork 的 `develop` 分支升级。官方仓库只作为上游输入：先同步 fork 的 `main` 或 `master`，再合并到 `develop`，验证通过后从 `develop` 全局安装。
 
-本机定制版本：
+升级处理过程：
+
+1. 进入 `<BRIDGE_SRC>`，确认工作区干净；如果有未提交改动，先停止并说明。
+2. 切到 `main`，同步官方最新代码到 fork 主干。
+3. 切回 `develop`，把 `main` 合并进来。
+4. 如果没有冲突，直接安装依赖并执行验证。
+5. 如果有冲突，先在源码层面解决冲突；解决后继续验证。
+6. 如果解决冲突会改变官方提供的新功能，或会破坏 `develop` 上已有的本机改造能力，立即停止，不安装到全局，并说明冲突点、受影响功能和建议取舍。
+7. 合并后检查 `develop` 上的改造是否仍有必要：官方已提供的能力不要重复改造；官方未提供但本机仍需要的能力，基于最新官方代码保留或重新实现。
+8. 验证通过前不要安装到全局；最终只从 `develop` 执行 `npm install -g .`。
+
+执行升级时使用 Skill 内置脚本。先确认两个路径：
+
+- `<SKILL_DIR>`：当前 `my-tools-manager` Skill 目录。
+- `<BRIDGE_SRC>`：本机 `lark-coding-agent-bridge` 源码目录。
 
 ```bash
-cd "<BRIDGE_SRC>"
-git switch main
-gh repo sync hengguao/lark-coding-agent-bridge -b main
-git fetch origin upstream
-git merge --ff-only origin/main
-git switch develop
-git merge main
-pnpm install
-pnpm test
-pnpm typecheck
-pnpm build
-npm install -g .
+SKILL_DIR="<SKILL_DIR>" \
+BRIDGE_SRC="<BRIDGE_SRC>" \
+PROFILE="claude" \
+UPSTREAM_REMOTE="upstream" \
+MAIN_BRANCH="main" \
+DEVELOP_BRANCH="develop" \
+bash "$SKILL_DIR/scripts/lark-channel-bridge-upgrade.sh"
 ```
 
-如果 fork 默认主干是 `master`，把上面命令中的 `main` 替换为 `master`。
+默认重启 `claude` profile。只有用户主动要求其他 profile 时，才修改 `PROFILE`。
+只有确认仓库远端或分支名不是 `upstream` / `main` / `develop` 时，才修改 `UPSTREAM_REMOTE`、`MAIN_BRANCH`、`DEVELOP_BRANCH`。
 
-合并策略：
+如果脚本返回 `20`，说明 merge 冲突已停在源码工作区。按上面的冲突处理规则解决后继续：
 
-1. 先把官方源码同步到 fork 的 `main` 或 `master`。
-2. 再把 `main` 或 `master` 合并到 `develop`。
-3. 如果 `git merge main` 出现冲突，优先在源码层面解决冲突，并重新执行 `pnpm test`、`pnpm typecheck`、`pnpm build`。
-4. 如果解决冲突会改变官方提供的新功能，或会破坏 `develop` 上已有的本机改造能力，立即停止合并，不安装到全局，并向用户说明冲突点、受影响功能和建议取舍。
-5. 合并后重新审视 `develop` 的改造：官方已提供的能力不要重复改造；官方未提供但本机仍需要的能力，基于最新官方代码重新实现或保留。
-6. 验证通过前不要安装到全局；最终只从 `develop` 执行 `npm install -g .`。
+```bash
+SKILL_DIR="<SKILL_DIR>" \
+BRIDGE_SRC="<BRIDGE_SRC>" \
+PROFILE="claude" \
+UPSTREAM_REMOTE="upstream" \
+MAIN_BRANCH="main" \
+DEVELOP_BRANCH="develop" \
+bash "$SKILL_DIR/scripts/lark-channel-bridge-upgrade.sh" --continue
+```
 
 只有用户明确要求升级官方原版时，才使用 npm registry：
 
 ```bash
 npm i -g lark-channel-bridge@latest
-```
-
-升级后验证：
-
-```bash
-lark-channel-bridge --version
-lark-channel-bridge --help
-command -v lark-channel-bridge
 ```
 
 如果后台服务已注册，升级后提醒用户重启对应 profile：
@@ -262,6 +267,35 @@ lark-channel-bridge unregister --profile <name>
 ```
 
 不要默认删除 `~/.lark-channel/`。它包含配置、profiles、会话、日志、secrets、附件缓存和 lark-cli 目录。只有用户明确要求清理状态，并确认影响后，才删除或迁移。
+
+## 功能改造
+
+当用户要求改造 `lark-channel-bridge` 功能时：
+
+1. 先确认本机源码路径 `<BRIDGE_SRC>`，不要修改全局 npm 安装目录或 `dist`。
+2. 所有代码改造都在 fork 的 `develop` 分支完成。
+3. 改造前确认工作区状态；如果有未提交改动，先说明并判断是否相关。相关改动继续基于现状处理，无关改动不要回滚。
+4. 如改造依赖官方新功能，先按“升级”流程把 `upstream/main` 合入 `develop`。
+5. 实现时优先在原代码结构上做最小必要修改，不大范围重构。
+6. 改造时若发现旧逻辑和预期不一致，立即停止并回滚已修改，并向用户确认后再继续。
+7. 验证顺序：优先相关测试，再执行 `pnpm typecheck`；风险较高或合并官方代码后执行 `pnpm test && pnpm typecheck && pnpm build`。
+8. 验证通过后，提交并推送到远端 `develop`：
+
+   ```bash
+   git status --short
+   git add <本次改动文件>
+   git commit -m "<commit message>"
+   git push origin develop
+   ```
+
+9. 推送成功后，从 `develop` 执行全局安装：
+
+   ```bash
+   git switch develop
+   npm install -g .
+   ```
+
+10. 如果后台服务已运行，按“升级后处理”判断是否重启 profile。
 
 ## 安装位置说明
 
