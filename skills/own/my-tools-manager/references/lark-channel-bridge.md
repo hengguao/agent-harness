@@ -3,7 +3,8 @@
 ## 工具信息
 
 - 工具名：lark-channel-bridge
-- 相关仓库：https://github.com/zarazhangrui/lark-coding-agent-bridge
+- 上游仓库：https://github.com/zarazhangrui/lark-coding-agent-bridge
+- 本机定制 fork：https://github.com/hengguao/lark-coding-agent-bridge
 - 中文 README：https://github.com/zarazhangrui/lark-coding-agent-bridge/blob/main/README.zh.md
 - npm 包名：`lark-channel-bridge`
 - CLI 命令：`lark-channel-bridge`
@@ -20,12 +21,14 @@
 自更新时重点检查：
 
 1. Node.js 版本要求是否变化。
-2. 安装命令是否仍是 `npm i -g lark-channel-bridge` / `pnpm add -g lark-channel-bridge`。
+2. 官方原版安装命令是否仍是 `npm i -g lark-channel-bridge` / `pnpm add -g lark-channel-bridge`。
 3. `npx` 是否仍只适合单次 `run`，服务层命令是否仍要求全局安装。
 4. `run`、`start`、`status`、`stop`、`restart`、`unregister`、profile 命令是否变化。
 5. `~/.lark-channel/` 数据目录、日志目录、secrets 文件和环境变量是否变化。
 6. 权限模式映射、访问控制、lark-cli 身份策略是否变化。
 7. 是否新增 MCP Server 启动方式；没有明确 MCP server 命令时，不生成 cc-switch `mcpServers` 配置。
+8. 本机定制 fork 的 `develop` 分支是否仍能通过 `pnpm test`、`pnpm typecheck` 和 `pnpm build`。
+9. 本机定制源码路径是否有效；无效则先确认新路径并更新本文。
 
 ## 前置条件
 
@@ -57,38 +60,99 @@ npm root -g
 
 如果 `--version` 不可用，不要直接判定失败；用 `--help`、`command -v` 和 npm 包信息辅助验证。
 
+## 本机源码路径
+
+本机定制源码路径由当前机器确认。执行本文命令时，先把 `<BRIDGE_SRC>` 替换为本机实际路径，不依赖 shell 环境变量：
+
+```text
+BRIDGE_SRC=<absolute path to local lark-coding-agent-bridge checkout>
+```
+
+执行安装、升级或重装前，先确认本机定制源码存在：
+
+```bash
+test -d "<BRIDGE_SRC>"
+```
+
+若源码路径不存在，先请用户确认新路径；确认后替换命令中的 `<BRIDGE_SRC>` 再继续。
+
+## 安装来源判断
+
+本机默认使用定制 fork 的 `develop` 分支作为安装和升级来源。不要在这台机器上用官方 npm latest 覆盖当前定制版本，除非用户明确要求切回官方原版。
+
+先确认全局 CLI 和定制源码：
+
+```bash
+command -v lark-channel-bridge || true
+npm list -g lark-channel-bridge --depth=0
+npm root -g
+git -C "<BRIDGE_SRC>" status --short --branch
+git -C "<BRIDGE_SRC>" remote -v
+```
+
+判断规则：
+
+1. 默认视为本机定制来源：从本机 fork 源码构建后 `npm install -g .`。
+2. 如果用户明确要求安装官方原版，才使用 `npm i -g lark-channel-bridge` 或 `pnpm add -g lark-channel-bridge`。
+3. 如果全局安装来源不清楚，先用 `npm list -g`、`npm root -g` 和 `command -v` 确认；不要直接覆盖。
+4. 后续定制改造都先提交到 fork 的 `develop` 分支，再从该分支构建安装；不要手改全局 `dist` 文件。
+
 ## 安装
 
-官方 README 推荐全局安装；服务层命令必须先全局安装，不能依赖 `npx` 临时缓存。
+服务层命令必须先全局安装，不能依赖 `npx` 临时缓存。当前机器默认安装定制 fork 的 `develop` 分支。
 
-npm：
+本机定制版本：
+
+```bash
+cd "<BRIDGE_SRC>"
+git switch develop
+git pull --ff-only origin develop
+pnpm install
+pnpm test
+pnpm typecheck
+pnpm build
+npm install -g .
+```
+
+只有用户明确要求官方原版时，才使用 npm registry：
 
 ```bash
 npm i -g lark-channel-bridge
 ```
 
-pnpm：
+官方原版如需使用 pnpm：
 
 ```bash
 pnpm add -g lark-channel-bridge
 ```
 
-默认优先使用 npm，除非用户明确要求 pnpm。
-
 ## 升级
 
-沿用当前安装来源，不主动迁移。
+当前机器默认从 fork 升级：先同步 fork 的 `main`，再把最新 `main` merge 到 `develop`，验证通过后从 `develop` 构建安装。
 
-npm 来源：
+本机定制版本：
+
+```bash
+cd "<BRIDGE_SRC>"
+git switch main
+gh repo sync hengguao/lark-coding-agent-bridge -b main
+git fetch origin upstream
+git merge --ff-only origin/main
+git switch develop
+git merge main
+pnpm install
+pnpm test
+pnpm typecheck
+pnpm build
+npm install -g .
+```
+
+如果 `git merge main` 出现冲突，先解决源码冲突并重新执行 `pnpm test`、`pnpm typecheck`、`pnpm build`；验证通过前不要安装到全局。
+
+只有用户明确要求升级官方原版时，才使用 npm registry：
 
 ```bash
 npm i -g lark-channel-bridge@latest
-```
-
-pnpm 来源：
-
-```bash
-pnpm add -g lark-channel-bridge@latest
 ```
 
 升级后验证：
@@ -110,35 +174,72 @@ lark-channel-bridge status --profile <name>
 
 ## 升级后处理
 
-升级后的处理分两部分：
+不要把“升级后重启”一律等同于直接 `restart`。先判断当前是不是“旧运行态 + 新 CLI”混跑，再决定是否需要显式迁移。
 
-1. 先完成服务切换，处理“旧运行态 + 新 CLI”混跑问题。
-2. 再处理本机的本地定制改造，确认是否需要基于新代码重新补丁。
+先做交叉检查，不只看单一命令：
 
-### 升级后重启 / 迁移 SOP
+```bash
+lark-channel-bridge ps
+pgrep -af lark-channel-bridge || true
+launchctl list | rg 'lark-channel-bridge|ai\.lark-channel-bridge' || true
+```
 
-详见 `references/lark-channel-bridge/operations.md`。
+如果同时满足下面任一类特征，按“显式迁移重启”处理，不直接执行 `restart`：
 
-### 升级后的本地定制改造：按群免 @
+1. `ps` / `status` 与系统真实运行状态不一致。
+2. 根目录 `~/.lark-channel/processes.json` 里是旧 entry，缺少 `profileName`、`agentKind`。
+3. `~/.lark-channel/config.json` 仍是 legacy 单配置结构，没有 `schemaVersion: 2`、`profiles`、`activeProfile`。
 
-详见 `references/lark-channel-bridge/local-patches.md`。
+显式迁移重启顺序：
+
+1. 先确认迁移目标 profile 目录不存在冲突。
+2. 停掉旧 daemon，避免 v2 迁移被活动旧进程阻塞。
+3. 显式执行迁移。
+4. 确认 `active-profile`、`profiles/<profile>/`、`config.json.bak` 已生成，且旧 `sessions` / `workspaces` / `logs` / `media` / `secrets` 已迁走。
+5. 用新版 profile 服务启动。
+6. 用 `ps`、`status --profile <name>`、系统服务状态三方交叉验证。
+
+macOS 上推荐命令顺序：
+
+```bash
+launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/ai.lark-channel-bridge.bot.plist
+lark-channel-bridge migrate --profile claude --agent claude
+lark-channel-bridge start --profile claude
+lark-channel-bridge ps
+lark-channel-bridge status --profile claude
+launchctl list | rg 'lark-channel-bridge|ai\.lark-channel-bridge' || true
+```
+
+如果已经确认是 v2 正常运行态，再执行普通重启：
+
+```bash
+lark-channel-bridge restart --profile <name>
+lark-channel-bridge status --profile <name>
+```
 
 ## 重装
 
 重装前必须确认安装来源、是否存在后台服务、是否需要保留 `~/.lark-channel/` 数据。
 
-npm 来源：
+本机定制版本：
+
+```bash
+npm uninstall -g lark-channel-bridge
+cd "<BRIDGE_SRC>"
+git switch develop
+git pull --ff-only origin develop
+pnpm install
+pnpm test
+pnpm typecheck
+pnpm build
+npm install -g .
+```
+
+官方原版 npm 来源：
 
 ```bash
 npm uninstall -g lark-channel-bridge
 npm i -g lark-channel-bridge@latest
-```
-
-pnpm 来源：
-
-```bash
-pnpm remove -g lark-channel-bridge
-pnpm add -g lark-channel-bridge@latest
 ```
 
 若有后台服务，先停止或注销服务：
@@ -149,6 +250,12 @@ lark-channel-bridge unregister --profile <name>
 ```
 
 不要默认删除 `~/.lark-channel/`。它包含配置、profiles、会话、日志、secrets、附件缓存和 lark-cli 目录。只有用户明确要求清理状态，并确认影响后，才删除或迁移。
+
+## 安装位置说明
+
+- CLI 路径：以 `command -v lark-channel-bridge` 为准。
+- npm 全局根目录：以 `npm root -g` 为准。
+- 全局安装后的运行文件来自 npm 全局目录；源码改造必须先进入 fork 的 `develop` 分支，再重新 `npm install -g .`。
 
 ## 首次启动和初始化
 
