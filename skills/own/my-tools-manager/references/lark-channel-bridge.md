@@ -65,7 +65,7 @@ npm root -g
 本机定制源码路径由当前机器确认。执行本文命令时，先把 `<BRIDGE_SRC>` 替换为本机实际路径，不依赖 shell 环境变量：
 
 ```text
-BRIDGE_SRC=<absolute path to local lark-coding-agent-bridge checkout>
+BRIDGE_SRC=/Users/wanhua/Resources/Project/wanhua/1-project/ai-code/demo-projects/lark-coding-agent-bridge
 ```
 
 执行安装、升级或重装前，先确认本机定制源码存在：
@@ -78,7 +78,9 @@ test -d "<BRIDGE_SRC>"
 
 ## 安装来源判断
 
-本机默认使用定制 fork 的 `develop` 分支作为安装和升级来源。不要在这台机器上用官方 npm latest 覆盖当前定制版本，除非用户明确要求切回官方原版。
+本机默认使用定制 fork 的 `develop` 分支作为安装和升级来源。即使当前全局 CLI 看起来来自 npm 官方包，也不要在这台机器上用官方 npm latest 覆盖当前定制版本，除非用户明确要求切回官方原版。
+
+官方源码仓库只作为上游输入：先同步到 fork 的 `main` 或 `master`，再把该分支合并到 `develop`，最终从 `develop` 构建并全局安装。
 
 先确认全局 CLI 和定制源码：
 
@@ -93,9 +95,10 @@ git -C "<BRIDGE_SRC>" remote -v
 判断规则：
 
 1. 默认视为本机定制来源：从本机 fork 源码构建后 `npm install -g .`。
-2. 如果用户明确要求安装官方原版，才使用 `npm i -g lark-channel-bridge` 或 `pnpm add -g lark-channel-bridge`。
+2. 用户提到“官方源码有新功能”时，理解为需要把官方最新源码同步进 fork，再评估并合入 `develop`，不是直接安装官方 npm 包。
 3. 如果全局安装来源不清楚，先用 `npm list -g`、`npm root -g` 和 `command -v` 确认；不要直接覆盖。
 4. 后续定制改造都先提交到 fork 的 `develop` 分支，再从该分支构建安装；不要手改全局 `dist` 文件。
+5. 如果用户明确要求安装官方原版，才使用 `npm i -g lark-channel-bridge` 或 `pnpm add -g lark-channel-bridge`。
 
 ## 安装
 
@@ -147,7 +150,16 @@ pnpm build
 npm install -g .
 ```
 
-如果 `git merge main` 出现冲突，先解决源码冲突并重新执行 `pnpm test`、`pnpm typecheck`、`pnpm build`；验证通过前不要安装到全局。
+如果 fork 默认主干是 `master`，把上面命令中的 `main` 替换为 `master`。
+
+合并策略：
+
+1. 先把官方源码同步到 fork 的 `main` 或 `master`。
+2. 再把 `main` 或 `master` 合并到 `develop`。
+3. 如果 `git merge main` 出现冲突，优先在源码层面解决冲突，并重新执行 `pnpm test`、`pnpm typecheck`、`pnpm build`。
+4. 如果解决冲突会改变官方提供的新功能，或会破坏 `develop` 上已有的本机改造能力，立即停止合并，不安装到全局，并向用户说明冲突点、受影响功能和建议取舍。
+5. 合并后重新审视 `develop` 的改造：官方已提供的能力不要重复改造；官方未提供但本机仍需要的能力，基于最新官方代码重新实现或保留。
+6. 验证通过前不要安装到全局；最终只从 `develop` 执行 `npm install -g .`。
 
 只有用户明确要求升级官方原版时，才使用 npm registry：
 
