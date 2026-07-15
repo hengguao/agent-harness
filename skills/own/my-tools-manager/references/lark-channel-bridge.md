@@ -65,7 +65,7 @@ npm root -g
 本机定制源码路径由当前机器确认。执行本文命令时，先把 `<BRIDGE_SRC>` 替换为本机实际路径，不依赖 shell 环境变量：
 
 ```text
-BRIDGE_SRC=/Users/wanhua/Resources/Project/wanhua/1-project/ai-code/demo-projects/lark-coding-agent-bridge
+BRIDGE_SRC=<absolute path to local lark-coding-agent-bridge checkout>
 ```
 
 执行安装、升级或重装前，先确认本机定制源码存在：
