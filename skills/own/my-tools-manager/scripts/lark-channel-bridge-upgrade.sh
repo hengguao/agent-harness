@@ -3,6 +3,7 @@ set -euo pipefail
 
 BRIDGE_SRC="${BRIDGE_SRC:-$(pwd)}"
 PROFILE="${PROFILE:-}"
+FORK_REMOTE="${FORK_REMOTE:-origin}"
 UPSTREAM_REMOTE="${UPSTREAM_REMOTE:-upstream}"
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
 DEVELOP_BRANCH="${DEVELOP_BRANCH:-develop}"
@@ -39,6 +40,10 @@ if [[ "${1:-}" == "--continue" ]]; then
   pnpm test
   pnpm typecheck
   pnpm build
+
+  git push "$FORK_REMOTE" "$DEVELOP_BRANCH"
+  git pull --ff-only "$FORK_REMOTE" "$DEVELOP_BRANCH"
+
   npm install -g .
 
   lark-channel-bridge --version
@@ -55,14 +60,20 @@ if [[ -n "$(git status --porcelain)" ]]; then
   exit 10
 fi
 
-git fetch origin "$UPSTREAM_REMOTE" --prune
+git fetch --prune "$FORK_REMOTE" "$MAIN_BRANCH" "$DEVELOP_BRANCH"
+git fetch --prune "$UPSTREAM_REMOTE" "$MAIN_BRANCH"
+
 git switch "$MAIN_BRANCH"
+git pull --ff-only "$FORK_REMOTE" "$MAIN_BRANCH"
 git merge --ff-only "$UPSTREAM_REMOTE/$MAIN_BRANCH"
+git push "$FORK_REMOTE" "$MAIN_BRANCH"
+git fetch --prune "$FORK_REMOTE" "$MAIN_BRANCH"
 
 git switch "$DEVELOP_BRANCH"
-if ! git merge "$MAIN_BRANCH"; then
+git pull --ff-only "$FORK_REMOTE" "$DEVELOP_BRANCH"
+if ! git merge "$FORK_REMOTE/$MAIN_BRANCH"; then
   echo "merge 冲突已进入工作区。解决冲突后执行："
-  echo "BRIDGE_SRC=\"$BRIDGE_SRC\" PROFILE=\"$PROFILE\" bash \"$SCRIPT_PATH\" --continue"
+  echo "BRIDGE_SRC=\"$BRIDGE_SRC\" PROFILE=\"$PROFILE\" FORK_REMOTE=\"$FORK_REMOTE\" UPSTREAM_REMOTE=\"$UPSTREAM_REMOTE\" bash \"$SCRIPT_PATH\" --continue"
   exit 20
 fi
 
@@ -70,6 +81,10 @@ pnpm install
 pnpm test
 pnpm typecheck
 pnpm build
+
+git push "$FORK_REMOTE" "$DEVELOP_BRANCH"
+git pull --ff-only "$FORK_REMOTE" "$DEVELOP_BRANCH"
+
 npm install -g .
 
 lark-channel-bridge --version

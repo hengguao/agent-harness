@@ -4,7 +4,7 @@
 
 - 工具名：lark-channel-bridge
 - 上游仓库：https://github.com/zarazhangrui/lark-coding-agent-bridge
-- 本机定制 fork：以本机源码仓库的 `origin` remote 为准
+- 本机定制 fork：https://github.com/hengguao/lark-coding-agent-bridge
 - 中文 README：https://github.com/zarazhangrui/lark-coding-agent-bridge/blob/main/README.zh.md
 - npm 包名：`lark-channel-bridge`
 - CLI 命令：`lark-channel-bridge`
@@ -62,7 +62,23 @@ npm root -g
 
 ## 本机源码路径
 
-本机定制源码路径由当前机器确认。执行本文命令时，先把 `<BRIDGE_SRC>` 替换为本机实际路径，不依赖 shell 环境变量：
+本机源码路径记录在本技能目录下的 `agent-engineering.local.yaml` 中：
+
+```yaml
+repository:
+  path: /absolute/path/to/lark-coding-agent-bridge
+```
+
+执行本文命令时，先定位本机路径：
+
+1. 读取本技能目录下的 `agent-engineering.local.yaml`。
+2. 如果文件存在，确认 `repository.path` 指向有效的 `lark-coding-agent-bridge` git 仓库。
+3. 如果文件不存在，或 `repository.path` 为空、路径不存在、路径不是 lark-coding-agent-bridge 仓库，先向用户确认新路径。
+4. 用户确认后，更新本技能目录下的 `agent-engineering.local.yaml`，写入 `repository.path`。
+5. 如果确认路径下还没有仓库，clone `https://github.com/hengguao/lark-coding-agent-bridge` 到该路径。
+6. 后续执行都读取 `agent-engineering.local.yaml` 中的 `repository.path`。
+
+然后把 `<BRIDGE_SRC>` 替换为本机实际路径，不依赖 shell 环境变量：
 
 ```text
 BRIDGE_SRC=<absolute path to local lark-coding-agent-bridge checkout>
@@ -74,13 +90,11 @@ BRIDGE_SRC=<absolute path to local lark-coding-agent-bridge checkout>
 test -d "<BRIDGE_SRC>"
 ```
 
-若源码路径不存在，先请用户确认新路径；确认后替换命令中的 `<BRIDGE_SRC>` 再继续。
-
 ## 安装来源判断
 
 本机默认使用定制 fork 的 `develop` 分支作为安装和升级来源。即使当前全局 CLI 看起来来自 npm 官方包，也不要在这台机器上用官方 npm latest 覆盖当前定制版本，除非用户明确要求切回官方原版。
 
-官方源码仓库只作为上游输入：先同步到 fork 的 `main` 或 `master`，再把该分支合并到 `develop`，最终从 `develop` 构建并全局安装。
+官方源码仓库只作为上游输入：先让远端定制 fork 的 `main` 同步官方仓库的 `main`，再把远端定制 fork 最新 `main` 合并到 `develop`，最终从 `develop` 构建并全局安装。
 
 先确认全局 CLI 和定制源码：
 
@@ -94,8 +108,8 @@ git -C "<BRIDGE_SRC>" remote -v
 
 判断规则：
 
-1. 默认视为本机定制来源：从本机 fork 源码构建后 `npm install -g .`。
-2. 用户提到“官方源码有新功能”时，理解为需要把官方最新源码同步进 fork，再评估并合入 `develop`，不是直接安装官方 npm 包。
+1. 默认视为本机定制来源：从本地源码 checkout 构建后 `npm install -g .`。
+2. 用户提到“官方源码有新功能”时，理解为需要先同步远端定制 fork 的 `main`，再评估并合入 `develop`，不是直接安装官方 npm 包。
 3. 如果全局安装来源不清楚，先用 `npm list -g`、`npm root -g` 和 `command -v` 确认；不要直接覆盖。
 4. 后续定制改造都先提交到 fork 的 `develop` 分支，再从该分支构建安装；不要手改全局 `dist` 文件。
 5. 如果用户明确要求安装官方原版，才使用 `npm i -g lark-channel-bridge` 或 `pnpm add -g lark-channel-bridge`。
@@ -131,18 +145,18 @@ pnpm add -g lark-channel-bridge
 
 ## 升级
 
-当前机器默认从本机 fork 的 `develop` 分支升级。官方仓库只作为上游输入：先同步 fork 的 `main` 或 `master`，再合并到 `develop`，验证通过后从 `develop` 全局安装。
+当前机器默认从远端定制 fork `hengguao/lark-coding-agent-bridge` 的 `develop` 分支升级。官方仓库只作为上游输入：先让远端定制 fork 的 `main` 同步官方仓库 `zarazhangrui/lark-coding-agent-bridge` 的 `main`，再把远端定制 fork 最新 `main` 合并到 `develop`；本地仓库拉取远端定制 fork 的 `develop`，验证通过后从 `develop` 全局安装。
 
 升级处理过程：
 
 1. 进入 `<BRIDGE_SRC>`，确认工作区干净；如果有未提交改动，先停止并说明。
-2. 切到 `main`，同步官方最新代码到 fork 主干。
-3. 切回 `develop`，把 `main` 合并进来。
+2. 同步远端定制 fork 的 `main`，使其跟上官方仓库的 `main`。
+3. 切回 `develop`，拉取远端定制 fork 的 `develop`，再把远端定制 fork 最新 `main` 合并进来。
 4. 如果没有冲突，直接安装依赖并执行验证。
 5. 如果有冲突，先在源码层面解决冲突；解决后继续验证。
 6. 如果解决冲突会改变官方提供的新功能，或会破坏 `develop` 上已有的本机改造能力，立即停止，不安装到全局，并说明冲突点、受影响功能和建议取舍。
 7. 合并后检查 `develop` 上的改造是否仍有必要：官方已提供的能力不要重复改造；官方未提供但本机仍需要的能力，基于最新官方代码保留或重新实现。
-8. 验证通过前不要安装到全局；最终只从 `develop` 执行 `npm install -g .`。
+8. 验证通过前不要安装到全局；最终只从远端定制 fork 的 `develop` 拉取后执行 `npm install -g .`。
 
 执行升级时使用 Skill 内置脚本。先确认两个路径：
 
@@ -153,6 +167,7 @@ pnpm add -g lark-channel-bridge
 SKILL_DIR="<SKILL_DIR>" \
 BRIDGE_SRC="<BRIDGE_SRC>" \
 PROFILE="claude" \
+FORK_REMOTE="origin" \
 UPSTREAM_REMOTE="upstream" \
 MAIN_BRANCH="main" \
 DEVELOP_BRANCH="develop" \
@@ -160,7 +175,7 @@ bash "$SKILL_DIR/scripts/lark-channel-bridge-upgrade.sh"
 ```
 
 默认重启 `claude` profile。只有用户主动要求其他 profile 时，才修改 `PROFILE`。
-只有确认仓库远端或分支名不是 `upstream` / `main` / `develop` 时，才修改 `UPSTREAM_REMOTE`、`MAIN_BRANCH`、`DEVELOP_BRANCH`。
+只有确认仓库远端或分支名不是 `origin` / `upstream` / `main` / `develop` 时，才修改 `FORK_REMOTE`、`UPSTREAM_REMOTE`、`MAIN_BRANCH`、`DEVELOP_BRANCH`。
 
 如果脚本返回 `20`，说明 merge 冲突已停在源码工作区。按上面的冲突处理规则解决后继续：
 
@@ -168,6 +183,7 @@ bash "$SKILL_DIR/scripts/lark-channel-bridge-upgrade.sh"
 SKILL_DIR="<SKILL_DIR>" \
 BRIDGE_SRC="<BRIDGE_SRC>" \
 PROFILE="claude" \
+FORK_REMOTE="origin" \
 UPSTREAM_REMOTE="upstream" \
 MAIN_BRANCH="main" \
 DEVELOP_BRANCH="develop" \
@@ -275,7 +291,7 @@ lark-channel-bridge unregister --profile <name>
 1. 先确认本机源码路径 `<BRIDGE_SRC>`，不要修改全局 npm 安装目录或 `dist`。
 2. 所有代码改造都在 fork 的 `develop` 分支完成。
 3. 改造前确认工作区状态；如果有未提交改动，先说明并判断是否相关。相关改动继续基于现状处理，无关改动不要回滚。
-4. 如改造依赖官方新功能，先按“升级”流程把 `upstream/main` 合入 `develop`。
+4. 如改造依赖官方新功能，先按“升级”流程把远端定制 fork 的 `main` 同步官方 `main`，再合入 `develop`。
 5. 实现时优先在原代码结构上做最小必要修改，不大范围重构。
 6. 改造时若发现旧逻辑和预期不一致，立即停止并回滚已修改，并向用户确认后再继续。
 7. 验证顺序：优先相关测试，再执行 `pnpm typecheck`；风险较高或合并官方代码后执行 `pnpm test && pnpm typecheck && pnpm build`。
