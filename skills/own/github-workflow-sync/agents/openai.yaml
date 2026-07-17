@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Workflow Sync"
+  short_description: "配置 GitHub Actions 跨仓库目录镜像同步"
+  default_prompt: "Use $github-workflow-sync to create a GitHub Actions workflow that mirrors directories between repositories."

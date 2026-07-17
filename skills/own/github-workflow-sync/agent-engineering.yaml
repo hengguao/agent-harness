@@ -1,0 +1,13 @@
+name: github-workflow-sync
+type: skill
+origin: own
+
+source:
+  kind: local
+
+sync:
+  mode: manual
+  last_checked:
+  last_updated: 2026-07-17
+  version:
+  notes: 创建和维护 GitHub Actions 跨仓库目录镜像同步 Workflow 的 Skill，包含 PAT、secret、手动触发和权限排查说明。
