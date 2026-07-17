@@ -8,6 +8,6 @@ source:
 sync:
   mode: manual
   last_checked:
-  last_updated: 2026-07-16
+  last_updated: 2026-07-17
   version:
   notes: 本机命令行工具、MCP 工具和开发辅助工具生命周期管理 Skill。
