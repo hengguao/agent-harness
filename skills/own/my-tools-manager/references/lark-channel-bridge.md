@@ -62,7 +62,7 @@ npm root -g
 
 ## 本机源码路径
 
-本机源码路径记录在本技能目录下的公共本机配置 `agent-engineering.local.yaml` 中，按工具名分组：
+本机源码路径记录在本技能目录下的公共配置 `agent-engineering.local.yaml` 中，按工具名分组：
 
 ```yaml
 tools:
