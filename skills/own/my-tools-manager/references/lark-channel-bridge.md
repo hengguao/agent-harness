@@ -62,21 +62,23 @@ npm root -g
 
 ## 本机源码路径
 
-本机源码路径记录在本技能目录下的 `agent-engineering.local.yaml` 中：
+本机源码路径记录在本技能目录下的公共本机配置 `agent-engineering.local.yaml` 中，按工具名分组：
 
 ```yaml
-repository:
-  path: /absolute/path/to/lark-coding-agent-bridge
+tools:
+  lark-coding-agent-bridge:
+    repository:
+      path: /absolute/path/to/lark-coding-agent-bridge
 ```
 
 执行本文命令时，先定位本机路径：
 
 1. 读取本技能目录下的 `agent-engineering.local.yaml`。
-2. 如果文件存在，确认 `repository.path` 指向有效的 `lark-coding-agent-bridge` git 仓库。
-3. 如果文件不存在，或 `repository.path` 为空、路径不存在、路径不是 lark-coding-agent-bridge 仓库，先向用户确认新路径。
-4. 用户确认后，更新本技能目录下的 `agent-engineering.local.yaml`，写入 `repository.path`。
+2. 如果文件存在，确认 `tools.lark-coding-agent-bridge.repository.path` 指向有效的 `lark-coding-agent-bridge` git 仓库。
+3. 如果文件不存在，或 `tools.lark-coding-agent-bridge.repository.path` 为空、路径不存在、路径不是 lark-coding-agent-bridge 仓库，先向用户确认新路径。
+4. 用户确认后，更新本技能目录下的 `agent-engineering.local.yaml`，写入 `tools.lark-coding-agent-bridge.repository.path`。
 5. 如果确认路径下还没有仓库，clone `https://github.com/hengguao/lark-coding-agent-bridge` 到该路径。
-6. 后续执行都读取 `agent-engineering.local.yaml` 中的 `repository.path`。
+6. 后续执行都读取 `agent-engineering.local.yaml` 中的 `tools.lark-coding-agent-bridge.repository.path`。
 
 然后把 `<BRIDGE_SRC>` 替换为本机实际路径，不依赖 shell 环境变量：
 
