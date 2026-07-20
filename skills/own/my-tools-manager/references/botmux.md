@@ -151,4 +151,4 @@ botmux <subcommand> --help
 
 ## 配置提醒
 
-`botmux` 是 IM ↔ AI 编程 CLI 桥接工具，不是 MCP Server。不要默认生成 cc-switch `mcpServers` 配置，除非官方文档明确提供 MCP server 启动方式。
+`botmux` 是 IM ↔ AI 编程 CLI 桥接工具，不是 MCP Server。不要默认生成 cc-switch `mcpServers` 配置，除非官方文档明确提供 MCP Server 启动方式。

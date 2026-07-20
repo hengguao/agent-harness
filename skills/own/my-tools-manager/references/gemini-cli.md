@@ -176,7 +176,7 @@ npm root -g
 - npm 包目录：`$(npm root -g)/@google/gemini-cli`。
 - Homebrew 或 MacPorts 目录：通过 `command -v gemini` 和 `ls -l` 确认。
 
-## cc-switch MCP 配置提醒
+## 配置提醒
 
 Gemini CLI 是 Agent CLI，不是 MCP Server。不要把 `gemini` 注册成 cc-switch 的 `mcpServers`。
 

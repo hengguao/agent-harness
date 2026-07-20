@@ -169,7 +169,7 @@ ls -d "$(npm root -g)/@openai/codex/node_modules/@openai"/codex-* 2>/dev/null
 - npm 包目录：`$(npm root -g)/@openai/codex`。
 - Homebrew 或 standalone 目录：通过 `command -v codex` 和 `ls -l` 确认。
 
-## cc-switch MCP 配置提醒
+## 配置提醒
 
 Codex CLI 是 Agent CLI，不是 MCP Server。不要把 `codex` 注册成 cc-switch 的 `mcpServers`。
 

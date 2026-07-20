@@ -1,6 +1,6 @@
 ---
 name: my-tools-manager
-description: 用于管理本机命令行工具、MCP 工具或开发辅助工具的安装、升级、重装、卸载前检查、版本验证、安装路径确认与配置提醒。用户要求安装、更新、升级、重装、检查安装状态、修复 PATH、确认工具装到哪里，或提到 codegraph、Claude Code、Codex CLI、Gemini CLI、GitHub CLI、gh、GitLab CLI、glab、kimi-webbridge、飞书 CLI、lark-cli、lark-channel-bridge、lark-coding-agent-bridge、botmux 等工具生命周期管理时使用。
+description: 用于管理本机命令行工具、MCP 工具或开发辅助工具的安装、升级、重装、卸载前检查、版本验证、安装路径确认与配置提醒。用户要求安装、更新、升级、重装、检查安装状态、修复 PATH、确认工具装到哪里，或提到 codegraph、Claude Code、Codex CLI、Gemini CLI、GitHub CLI、gh、GitLab CLI、glab、Aliyun CLI、阿里云 CLI、aliyun、kimi-webbridge、飞书 CLI、lark-cli、lark-channel-bridge、lark-coding-agent-bridge、botmux 等工具生命周期管理时使用。
 ---
 
 # My Tools Manager
@@ -23,6 +23,7 @@ description: 用于管理本机命令行工具、MCP 工具或开发辅助工具
    - `Gemini CLI` / `gemini`：读取 `references/gemini-cli.md`。
    - `GitHub CLI` / `gh`：读取 `references/github-cli.md`。
    - `GitLab CLI` / `glab`：读取 `references/gitlab-cli.md`。
+   - `Aliyun CLI` / `阿里云 CLI` / `aliyun`：读取 `references/aliyun-cli.md`。
    - `kimi-webbridge`：读取 `references/kimi-webbridge.md`。
    - `lark-cli` / 飞书 CLI：读取 `references/lark-cli.md`。
    - `lark-channel-bridge` / `lark-coding-agent-bridge`：读取 `references/lark-channel-bridge.md`。

@@ -21,7 +21,7 @@
 3. 安装器是否仍负责安装 CLI 和 Agent Skills。
 4. 升级、卸载、重装是否新增官方命令；若仍缺失卸载说明，保留待确认风险。
 5. 认证、授权链接、后台运行和输出格式说明是否变化。
-6. 是否新增 MCP Server 启动方式；没有明确 MCP server 命令时，不生成 cc-switch `mcpServers` 配置。
+6. 是否新增 MCP Server 启动方式；没有明确 MCP Server 命令时，不生成 cc-switch `mcpServers` 配置。
 
 ## 环境要求
 
@@ -214,12 +214,12 @@ lark-cli im +messages-send --chat-id oc_xxx --text "hello" --dry-run
 - 若能确认 npm 全局安装，包目录通常是 `$(npm root -g)/@larksuite/cli`。
 - 若是 installer 写入的二进制或脚本，以 `command -v lark-cli` 和 `ls -l` 实际结果为准。
 
-## cc-switch MCP 配置提醒
+## 配置提醒
 
 `lark-cli` 是飞书官方 CLI 和 Agent Skills 工具，不要默认当作 MCP Server 注册到 cc-switch 的 `mcpServers`。
 
 如果用户问 MCP：
 
 - 先确认官方文档是否提供 MCP Server 启动方式。
-- 没有明确 MCP server 命令时，不生成 `mcpServers` 配置。
+- 没有明确 MCP Server 命令时，不生成 `mcpServers` 配置。
 - 可以提醒用户它更像“Agent 可调用 CLI + skills”，不是 `stdio` MCP 服务。

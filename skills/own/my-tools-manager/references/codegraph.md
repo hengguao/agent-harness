@@ -73,7 +73,7 @@ codegraph --help
 - npm 包目录：`$(npm root -g)/@colbymchenry/codegraph`。
 - 若 CLI 是符号链接，可用 `ls -l "$(command -v codegraph)"` 说明真实指向。
 
-## cc-switch MCP 配置提醒
+## 配置提醒
 
 用户使用 cc-switch 管理 MCP 时，默认不要直接修改配置。处理完安装/升级/重装后，主动提醒是否需要更新 MCP 配置，并给出配置项。
 

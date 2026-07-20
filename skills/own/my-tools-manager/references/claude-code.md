@@ -154,7 +154,7 @@ npm root -g
 - npm 包目录：`$(npm root -g)/@anthropic-ai/claude-code`。
 - Homebrew 或 Native Installer 目录：通过 `command -v claude` 和 `ls -l` 确认。
 
-## cc-switch MCP 配置提醒
+## 配置提醒
 
 Claude Code 是 Agent CLI，不是 MCP Server。不要把 `claude` 注册成 cc-switch 的 `mcpServers`。
 

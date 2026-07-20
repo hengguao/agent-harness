@@ -26,7 +26,7 @@
 4. `run`、`start`、`status`、`stop`、`restart`、`unregister`、profile 命令是否变化。
 5. `~/.lark-channel/` 数据目录、日志目录、secrets 文件和环境变量是否变化。
 6. 权限模式映射、访问控制、lark-cli 身份策略是否变化。
-7. 是否新增 MCP Server 启动方式；没有明确 MCP server 命令时，不生成 cc-switch `mcpServers` 配置。
+7. 是否新增 MCP Server 启动方式；没有明确 MCP Server 命令时，不生成 cc-switch `mcpServers` 配置。
 8. 本机定制 fork 的 `develop` 分支是否仍能通过 `pnpm test`、`pnpm typecheck` 和 `pnpm build`。
 9. 本机定制源码路径是否有效；无效则先确认新路径并更新本文。
 
@@ -547,12 +547,12 @@ LARK_CHANNEL_LOG_DAYS=14 lark-channel-bridge start
 LARK_CHANNEL_TELEMETRY_MODULE=your-telemetry-package lark-channel-bridge start
 ```
 
-## cc-switch MCP 配置提醒
+## 配置提醒
 
 `lark-channel-bridge` 是飞书消息到本地 Claude Code / Codex CLI 的桥接 bot，不是 MCP Server。不要默认生成 cc-switch `mcpServers` 配置。
 
 如果用户问 MCP：
 
-- 说明它通过飞书消息驱动本机 agent，不通过 MCP stdio 暴露工具。
-- 只有 README 或官方文档明确提供 MCP server 启动方式时，才生成 MCP 配置。
+- 说明它通过飞书消息驱动本机 agent，不通过 `stdio` MCP Server 暴露工具。
+- 只有 README 或官方文档明确提供 MCP Server 启动方式时，才生成 MCP 配置。
 - 当前规则只管理安装、运行、后台服务、profile 和数据目录。

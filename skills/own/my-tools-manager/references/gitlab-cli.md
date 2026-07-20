@@ -180,3 +180,9 @@ git remote -v
 
 - GitLab token、OAuth device code、SSH 私钥、cookie 和一次性验证码都属于敏感信息，不要输出、记录或提交。
 - 对自建 GitLab 执行写操作前，确认 `glab auth status --hostname <host>` 与当前仓库 remote host 一致。
+
+## 配置提醒
+
+`glab` 是 GitLab 官方 CLI，不是 MCP Server。不要默认生成 cc-switch `mcpServers` 配置。
+
+如果用户要让其他工具使用 GitLab 认证，优先确认该工具是否支持读取 Git credential、SSH agent、`GITLAB_TOKEN` 或 `GLAB_TOKEN`；不要把 token 写入仓库、Skill reference 或明文配置。

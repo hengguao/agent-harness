@@ -232,12 +232,12 @@ export PATH="$HOME/.kimi-webbridge/bin:$PATH"
 - 排障时不要输出敏感网页内容、cookie、token、身份文件或日志中的密钥。
 - `identity.json` 不要提交、复制或展示。
 
-## cc-switch MCP 配置提醒
+## 配置提醒
 
 `kimi-webbridge` 是浏览器桥接 daemon + Skill，不是需要手写到 cc-switch 的普通 MCP Server。不要默认生成 `mcpServers` 配置。
 
 如果用户问 MCP：
 
-- 先检查安装脚本或官方帮助是否新增 MCP server 启动方式。
-- 没有明确 `stdio` MCP server 命令时，不生成 cc-switch 配置。
+- 先检查安装脚本或官方帮助是否新增 MCP Server 启动方式。
+- 没有明确 `stdio` MCP Server 命令时，不生成 cc-switch 配置。
 - 通常应通过安装脚本安装 Skill 和 daemon，然后由对应 Agent Skill 调用本地桥接能力。
