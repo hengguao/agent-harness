@@ -12,7 +12,7 @@
 - Homebrew formula：`aliyun-cli`
 - SLS 插件名：`aliyun-cli-sls`
 
-用途：在终端中调用阿里云 OpenAPI，管理云资源；麓客+ SLS 日志查询依赖 `aliyun sls get-logs-v2`。
+用途：在终端中调用阿里云 OpenAPI，管理云资源；SLS 插件用于 Simple Log Service 操作。
 
 ## 自更新流程
 
@@ -141,7 +141,7 @@ brew install aliyun-cli
 
 ## SLS 插件
 
-麓客+ SLS 日志查询依赖：
+SLS 日志查询可使用：
 
 ```bash
 aliyun sls get-logs-v2
@@ -194,12 +194,6 @@ done
 aliyun configure --mode AK --profile default
 ```
 
-麓客+ SLS 使用时，Region 填：
-
-```text
-cn-chengdu
-```
-
 如果在 Codex 后台 PTY 中无法让用户输入凭证，打开本机可见 Terminal：
 
 ```bash
@@ -222,41 +216,11 @@ aliyun configure list
 
 只报告命令是否成功、配置文件是否存在和 profile 状态；不要打印完整配置内容。
 
-## 麓客+ SLS 验证
-
-`luxelakes-sls-query` 的最小验证命令：
-
-```bash
-bash /Users/wanhua/.skillstack/skills/luxelakes-sls-query/sls.sh topics --last 1h
-```
-
-成功时会把 topic 列表缓存到：
-
-```text
-~/.cache/luxelakes-sls/topics.txt
-```
-
-如果返回 Unauthorized，确认当前账号或 RAM 用户是否具备：
-
-```text
-log:GetLogStoreLogs
-log:GetIndex
-```
-
-目标项目和 Logstore：
-
-```text
-project: luxelakes-server-logs
-logstore: luke-server-logs
-region: cn-chengdu
-```
-
 ## 安全规则
 
 - AK/SK、STS token、Bearer token、OAuth code、RAM Role 临时凭证和 `~/.aliyun/config.json` 内容都属于敏感信息，不要输出、记录或提交。
 - 默认只检查 `aliyun configure list` 的返回状态，不打印完整内容。
 - 不要把 AK/SK 写进 shell 命令、日志、Skill reference 或 cc-switch 配置。
-- 查询 SLS 是只读操作，但会访问线上日志；用户明确要求查某环境、服务、关键词或 traceId 后再执行。
 - 遇到权限错误时，只报告缺少的权限和目标资源，不推测或输出账号身份细节。
 
 ## 安装位置说明
@@ -266,7 +230,6 @@ region: cn-chengdu
 - Homebrew Intel 默认安装目录通常是 `/usr/local/Cellar/aliyun-cli/<version>`。
 - Homebrew 会把 `/opt/homebrew/bin/aliyun` 或 `/usr/local/bin/aliyun` 链接到 Cellar 里的实际二进制。
 - 阿里云 CLI 用户配置通常位于 `~/.aliyun`，不要在重装或升级时删除。
-- 麓客+ SLS topic 缓存位于 `~/.cache/luxelakes-sls/topics.txt`，不要在工具管理流程里默认删除。
 
 ## 配置提醒
 
